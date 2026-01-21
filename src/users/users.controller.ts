@@ -18,4 +18,15 @@ import { UpdateUserDto } from './dto/update-product.dto'
 @Controller('users')
 export class UsersController {
     constructor(private readonly userService: UsersService) {}
+
+    @Get()
+    findAll(): User[] {
+        return this.userService.findAll();
+    }
+
+    @Get(':id')
+    findOne(@Param('id', ParseIntPipe) id: number): User {
+        return this.userService.findOne(id);
+    }
+    
 }
