@@ -43,4 +43,10 @@ export class UsersController {
     ): User {
         return this.userService.update(id, UpdateUserDto)
     }
+
+    @Delete(':id')
+    @HttpCode(HttpStatus.NO_CONTENT)
+    remove(@Param('id', ParseIntPipe) id: number): void {
+        this.userService.remove(id);
+    }
 }
