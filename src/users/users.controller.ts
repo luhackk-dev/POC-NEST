@@ -35,4 +35,12 @@ export class UsersController {
     create(@Body() createUserDto: CreateUserDto): User{
         return this.userService.create(createUserDto);
     }
+
+    @Put(':id')
+    update(
+        @Param('id', ParseIntPipe) id: number,
+        @Body() UpdateUserDto:UpdateUserDto,
+    ): User {
+        return this.userService.update(id, UpdateUserDto)
+    }
 }
