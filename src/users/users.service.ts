@@ -54,6 +54,16 @@ export class UsersService {
     return updatedUser;
     }
 
+    remove(id: number): void {
+        const userIndex = this.users.findIndex((p) => p.id === id);
+
+        if (userIndex === -1) {
+      throw new NotFoundException(`Product ID ${id} was not found`);
+        }
+
+        this.users.splice(userIndex, 1);
+    }
+
     private generateId(): number {
         const maxId = this.users.reduce(
             (max, p) => (p.id > max ? p.id : max),
