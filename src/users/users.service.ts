@@ -13,4 +13,15 @@ export class UsersService {
         return this.users;
     }
 
+// Its a lambda expression?
+    findOne(id: number): User {
+        const user = this.users.find((p) => p.id === id);
+        
+        if (!user) {
+            throw new NotFoundException(`Product ID ${id} was not found`);
+        }
+
+        return user;
+    }
+
 }
