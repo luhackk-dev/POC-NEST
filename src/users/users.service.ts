@@ -4,6 +4,7 @@ import { usersMock } from "./mock/user.mock";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-product.dto";
 import { productsMock } from "src/products/mock/products.mock";
+import { Product } from "src/products/entities/product.entity";
 
 @Injectable()
 export class UsersService {
@@ -33,6 +34,24 @@ export class UsersService {
 
         this.users.push(newUser);
         return newUser;
+    }
+
+    update(id: number, updateUserDto: UpdateUserDto): User {
+        const userIndex = this.users.findIndex((p) => p.id === id);
+    
+        if (userIndex === -1) {
+            throw new NotFoundException(`Product ID ${id} was not found`);
+        };
+
+// Why here "new" isn't work??
+
+          const updatedUser: User = {
+        ...this.users[userIndex],
+        ...updateUserDto
+    };
+
+    this.users[userIndex] = updatedUser;
+    return updatedUser;
     }
 
     private generateId(): number {
