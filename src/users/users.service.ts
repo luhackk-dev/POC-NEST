@@ -24,4 +24,11 @@ export class UsersService {
         return user;
     }
 
+    private generateId(): number {
+        const maxId = this.users.reduce(
+            (max, p) => (p.id > max ? p.id : max),
+            0,
+        );
+        return maxId + 1;
+    }
 }
