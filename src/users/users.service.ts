@@ -24,6 +24,17 @@ export class UsersService {
         return user;
     }
 
+    create(dto: CreateUserDto): User{
+        const newUser: User = {
+            id: this.generateId(),
+            name: dto.name,
+            email: dto.email
+        }
+
+        this.users.push(newUser);
+        return newUser;
+    }
+
     private generateId(): number {
         const maxId = this.users.reduce(
             (max, p) => (p.id > max ? p.id : max),
