@@ -14,6 +14,7 @@ import { UsersService } from './users.service'
 import { User } from './entities/user.entity'
 import { CreateUserDto } from './dto/create-user.dto'
 import { UpdateUserDto } from './dto/update-product.dto'
+import { Product } from 'src/products/entities/product.entity'
 
 @Controller('users')
 export class UsersController {
@@ -28,5 +29,10 @@ export class UsersController {
     findOne(@Param('id', ParseIntPipe) id: number): User {
         return this.userService.findOne(id);
     }
-    
+
+    @Post()
+    @HttpCode(HttpStatus.CREATED)
+    create(@Body() createUserDto: CreateUserDto): User{
+        return this.userService.create(createUserDto);
+    }
 }
