@@ -9,5 +9,8 @@ import { productsMock } from "src/products/mock/products.mock";
 export class UsersService {
     private users: User[] = [...usersMock];
 
+    findAll(): User[] {
+        return this.users;
+    }
 
 }
