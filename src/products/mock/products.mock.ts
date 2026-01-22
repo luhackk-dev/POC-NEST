@@ -9,7 +9,7 @@ export const productsMock: Product[] = [
     quantity: 10,
     createdAt: new Date('2025-01-01'),
     updatedAt: new Date('2025-01-01'),
-    yearAt: new Date('2025')
+    yearAt: new Date('2025'),
   },
   {
     id: 2,
