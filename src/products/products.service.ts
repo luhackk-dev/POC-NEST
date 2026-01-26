@@ -1,74 +1,74 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { KnexService } from '../database/knex.service';
 import { Product } from './entities/product.entity';
-import { productsMock } from './mock/products.mock';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 
 @Injectable()
 export class ProductsService {
-  private products: Product[] = [...productsMock];
+  constructor(private readonly knexService: KnexService) {}
 
-  findAll(): Product[] {
-    return this.products;
+  async findAll(): Promise<Product[]> {
+    const products = await this.knexService.knex('products').select('*');
+    return products.map((product) => new Product(product));
   }
 
-  findOne(id: number): Product {
-    const product = this.products.find((p) => p.id === id);
+  async findOne(id: number): Promise<Product> {
+    const product = await this.knexService.knex('products')
+      .where({ id })
+      .first();
 
     if (!product) {
       throw new NotFoundException(`Produto com ID ${id} não encontrado`);
     }
 
-    return product;
+    return new Product(product);
   }
 
-  create(createProductDto: CreateProductDto): Product {
-    const newId = this.generateId();
-    const now = new Date();
+  async create(createProductDto: CreateProductDto): Promise<Product> {
+    const [product] = await this.knexService.knex('products')
+      .insert({
+        ...createProductDto,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        yearAt: new Date(),
+      })
+      .returning('*');
 
-    const newProduct = new Product({
-      id: newId,
-      ...createProductDto,
-      createdAt: now,
-      updatedAt: now,
-    });
-
-    this.products.push(newProduct);
-    return newProduct;
+    return new Product(product);
   }
 
-  update(id: number, updateProductDto: UpdateProductDto): Product {
-    const productIndex = this.products.findIndex((p) => p.id === id);
+  async update(id: number, updateProductDto: UpdateProductDto): Promise<Product> {
+    const product = await this.knexService.knex('products')
+      .where({ id })
+      .first();
 
-    if (productIndex === -1) {
+    if (!product) {
       throw new NotFoundException(`Produto com ID ${id} não encontrado`);
     }
 
-    const updatedProduct = new Product({
-      ...this.products[productIndex],
-      ...updateProductDto,
-      updatedAt: new Date(),
-    });
+    const [updatedProduct] = await this.knexService.knex('products')
+      .where({ id })
+      .update({
+        ...updateProductDto,
+        updatedAt: new Date(),
+      })
+      .returning('*');
 
-    this.products[productIndex] = updatedProduct;
-    return updatedProduct;
+    return new Product(updatedProduct);
   }
 
-  remove(id: number): void {
-    const productIndex = this.products.findIndex((p) => p.id === id);
+  async remove(id: number): Promise<void> {
+    const product = await this.knexService.knex('products')
+      .where({ id })
+      .first();
 
-    if (productIndex === -1) {
+    if (!product) {
       throw new NotFoundException(`Produto com ID ${id} não encontrado`);
     }
 
-    this.products.splice(productIndex, 1);
-  }
-
-  private generateId(): number {
-    const maxId = this.products.reduce(
-      (max, p) => (p.id > max ? p.id : max),
-      0,
-    );
-    return maxId + 1;
+    await this.knexService.knex('products')
+      .where({ id })
+      .delete();
   }
 }
