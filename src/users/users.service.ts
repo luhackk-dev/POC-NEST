@@ -1,67 +1,73 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { KnexService } from '../database/knex.service';
 import { User } from './entities/user.entity';
-import { usersMock } from './mock/user.mock';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
-  private users: User[] = [...usersMock];
+  constructor(private readonly knexService: KnexService) {}
 
-  findAll(): User[] {
-    return this.users;
+  async findAll(): Promise<User[]> {
+    const users = await this.knexService.knex('users').select('*');
+    return users.map((user) => new User(user));
   }
 
-  // Its a lambda expression?
-  findOne(id: number): User {
-    const user = this.users.find((user) => user.id === id);
+  async findOne(id: number): Promise<User> {
+    const user = await this.knexService.knex('users')
+      .where({ id })
+      .first();
 
     if (!user) {
-      throw new NotFoundException(`User ID ${id} was not found`);
+      throw new NotFoundException(`User com ID ${id} não encontrado`);
     }
 
-    return user;
+    return new User(user);
   }
 
-  create(dto: CreateUserDto): User {
-    const newUser: User = {
-      id: this.generateId(),
-      name: dto.name,
-      email: dto.email,
-    };
+  async create(createUserDto: CreateUserDto): Promise<User> {
+    const [user] = await this.knexService.knex('users')
+      .insert({
+        ...createUserDto,
+        created_at: new Date(),
+        updated_at: new Date(),
+      })
+      .returning('*');
 
-    this.users.push(newUser);
-    return newUser;
+    return new User(user);
   }
 
-  update(id: number, updateUserDto: UpdateUserDto): User {
-    const userIndex = this.users.findIndex((user) => user.id === id);
+  async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
+    const user = await this.knexService.knex('users')
+      .where({ id })
+      .first();
 
-    if (userIndex === -1) {
-      throw new NotFoundException(`User ID ${id} was not found`);
+    if (!user) {
+      throw new NotFoundException(`User com ID ${id} não encontrado`);
     }
 
-    const updatedUser: User = {
-      ...this.users[userIndex],
-      ...updateUserDto,
-    };
+    const [updatedUser] = await this.knexService.knex('users')
+      .where({ id })
+      .update({
+        ...updateUserDto,
+        updated_at: new Date(),
+      })
+      .returning('*');
 
-    this.users[userIndex] = updatedUser;
-    return updatedUser;
+    return new User(updatedUser);
   }
 
-  remove(id: number): void {
-    const userIndex = this.users.findIndex((user) => user.id === id);
+  async remove(id: number): Promise<void> {
+    const user = await this.knexService.knex('users')
+      .where({ id })
+      .first();
 
-    if (userIndex === -1) {
-      throw new NotFoundException(`User ID ${id} was not found`);
+    if (!user) {
+      throw new NotFoundException(`User com ID ${id} não encontrado`);
     }
 
-    this.users.splice(userIndex, 1);
-  }
-
-  private generateId(): number {
-    const maxId = this.users.reduce((max, user) => (user.id > max ? user.id : max), 0);
-    return maxId + 1;
+    await this.knexService.knex('users')
+      .where({ id })
+      .delete();
   }
 }
