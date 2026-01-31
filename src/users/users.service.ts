@@ -29,40 +29,43 @@ export class UsersService {
     const [user] = await this.knexService.knex('users')
       .insert({
         ...createUserDto,
-        created_at: new Date(),
-        updated_at: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        yearAt: new Date(),
       })
       .returning('*');
 
     return new User(user);
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
-    const user = await this.knexService.knex('users')
-      .where({ id })
-      .first();
+async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
+  const user = await this.knexService.knex('users')
+    .where({ id })
+    .first();
 
-    if (!user) {
-      throw new NotFoundException(`User com ID ${id} não encontrado`);
-    }
-
-    const [updatedUser] = await this.knexService.knex('users')
-      .where({ id })
-      .update({
-        ...updateUserDto,
-        updated_at: new Date(),
-      })
-      .returning('*');
-
-    return new User(updatedUser);
+  if (!user) {
+    throw new NotFoundException(`User com ID ${id} não encontrado`);
   }
 
+  await this.knexService.knex('users')
+    .where({ id })
+    .update({
+      ...updateUserDto,
+      updatedAt: new Date(),
+    });
+
+  return (await this.knexService.knex('users')
+    .where({ id })
+    .first()) as User;
+}
+
+
   async remove(id: number): Promise<void> {
-    const user = await this.knexService.knex('users')
+    const User = await this.knexService.knex('users')
       .where({ id })
       .first();
 
-    if (!user) {
+    if (!User) {
       throw new NotFoundException(`User com ID ${id} não encontrado`);
     }
 
