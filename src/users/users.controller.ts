@@ -14,28 +14,42 @@ import { UsersService } from './users.service';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
+@ApiTags('Users')
 @Controller('users')
 export class UsersController {
   constructor(private readonly userService: UsersService) {}
 
   @Get()
+  @ApiOperation({summary: 'List users'})
+  @ApiResponse({status: 200, description: 'List of users retrieved successfully'})
+
   findAll(): Promise<User[]> {
     return this.userService.findAll();
   }
 
   @Get(':id')
+  @ApiOperation({summary: 'List a user by id'})
+  @ApiResponse({status: 200, description: 'User found by id'})
+
   findOne(@Param('id', ParseIntPipe) id: number): Promise<User> {
     return this.userService.findOne(id);
   }
 
   @Post()
+  @ApiOperation({summary: "Send user to database"})
+  @ApiResponse({status: 200, description: "User sent to database"})
+
   @HttpCode(HttpStatus.CREATED)
   create(@Body() createUserDto: CreateUserDto): Promise<User> {
     return this.userService.create(createUserDto);
   }
 
   @Put(':id')
+  @ApiOperation({summary: "Update user by id"})
+  @ApiResponse({status: 200, description: "User updated successfully"})
+
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() UpdateUserDto: UpdateUserDto,
@@ -44,6 +58,9 @@ export class UsersController {
   }
 
   @Delete(':id')
+  @ApiOperation({summary: "Delete user by id"})
+  @ApiResponse({status: 204, description: "User deleted successfully"})
+  
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
     return this.userService.remove(id);
