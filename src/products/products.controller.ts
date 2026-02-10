@@ -14,7 +14,9 @@ import { ProductsService } from './products.service';
 import { Product } from './entities/product.entity';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
+import { ProductResponseSchema } from '../schemas/product.schema';
+import { ErrorResponseSchema, NotFoundErrorSchema } from '../schemas/error.schema';
 
 @ApiTags('Products')
 @Controller('products')
@@ -24,8 +26,18 @@ export class ProductsController {
   @Get()
 
   @ApiOperation({summary: 'List products'})
-  @ApiResponse({status: 200, description: 'List of products retrieved successfully'})
-  
+  @ApiResponse({
+    status: 200,
+    description: 'List of products retrieved successfully',
+    type: ProductResponseSchema,
+    isArray: true,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request',
+    type: ErrorResponseSchema,
+  })
+
   async findAll(): Promise<Product[]> {
     return this.productsService.findAll();
   }
@@ -33,7 +45,16 @@ export class ProductsController {
   @Get(':id')
 
   @ApiOperation({summary: 'List a product by id'})
-  @ApiResponse({status: 200, description: 'Product found by id'})
+  @ApiResponse({
+    status: 200,
+    description: 'Product found by id',
+    type: ProductResponseSchema
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Product not found',
+    type: NotFoundErrorSchema,
+  })
 
   async findOne(@Param('id', ParseIntPipe) id: number): Promise<Product> {
     return this.productsService.findOne(id);
@@ -42,8 +63,17 @@ export class ProductsController {
   @Post()
 
   @ApiOperation({summary: "Send product to database"})
-  @ApiResponse({status: 200, description: "Product sent to database"})
-  
+  @ApiResponse({
+    status: 201,
+    description: "Product sent to database",
+    type: ProductResponseSchema
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request',
+    type: ErrorResponseSchema,
+  })
+
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() createProductDto: CreateProductDto): Promise<Product> {
     console.log(createProductDto);
@@ -53,7 +83,16 @@ export class ProductsController {
   @Put(':id')
 
   @ApiOperation({summary: "Update product by id"})
-  @ApiResponse({status: 200, description: "Product updated successfully"})
+  @ApiResponse({
+    status: 200,
+    description: "Product updated successfully",
+    type: ProductResponseSchema
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request',
+    type: ErrorResponseSchema,
+  })
 
   async update(
     @Param('id', ParseIntPipe) id: number,
@@ -64,7 +103,15 @@ export class ProductsController {
 
   @Delete(':id')
   @ApiOperation({summary: "Delete product by id"})
-  @ApiResponse({status: 200, description: "Product deleted successfully"})
+  @ApiResponse({
+    status: 204,
+    description: "Product deleted successfully"
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Product not found',
+    type: NotFoundErrorSchema,
+  })
 
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
