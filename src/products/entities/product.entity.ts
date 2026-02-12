@@ -4,6 +4,7 @@ export class Product {
   description: string;
   price: number;
   quantity: number;
+  userId: number;
   createdAt: Date;
   updatedAt: Date;
   yearAt: Date;

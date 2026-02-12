@@ -2,7 +2,7 @@ import type { Knex } from "knex";
 
 
 export async function up(knex: Knex): Promise<void> {
-    return knex.schema.table('products', (table) => {
+    return knex.schema.alterTable('products', (table) => {
         table.integer('user_id')
         .unsigned().
         references('id').
