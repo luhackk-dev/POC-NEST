@@ -35,7 +35,14 @@ export class ProductsController {
     console.log(createProductDto);
     return this.productsService.create(createProductDto);
   }
-
+   
+  @Post('/users/:userId/products')
+  async createForUser(
+   @Param('userId', ParseIntPipe) userId: number,
+   @Body() createProductDto: CreateProductDto,) 
+   {
+     return this.productsService.createForUser(userId, createProductDto);
+}
   @Put(':id')
   async update(
     @Param('id', ParseIntPipe) id: number,
