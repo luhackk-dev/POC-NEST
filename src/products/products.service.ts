@@ -38,6 +38,23 @@ export class ProductsService {
     return new Product(product);
   }
 
+  async createForUser(
+    userId: number,
+    createProductDto: CreateProductDto,
+  ): Promise<Product> {
+    const [product] = await this.knexService.knex('products')
+      .insert({
+        ...createProductDto,
+        user_id: userId,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        yearAt: new Date(),
+      })
+      .returning('*');
+
+    return new Product(product);
+  }
+
   async update(id: number, updateProductDto: UpdateProductDto): Promise<Product> {
     const product = await this.knexService.knex('products')
       .where({ id })
